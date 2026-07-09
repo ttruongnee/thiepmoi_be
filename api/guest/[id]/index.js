@@ -8,8 +8,6 @@ const supabase = createClient(
 export default async function handler(req, res) {
   let { id } = req.query;
   if (id === undefined || id === null) id = '';
-  
-  const { id } = req.query;
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
