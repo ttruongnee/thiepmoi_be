@@ -7,12 +7,12 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, PUT, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // Lấy tất cả lời chúc
+    // GET: Lấy tất cả lời chúc
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('loichuc')
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, data });
     }
 
-    // Xoá lời chúc theo idloichuc
+    // DELETE: Xoá lời chúc
     if (req.method === 'DELETE') {
       const idloichuc = req.query.idloichuc || req.body.idloichuc;
       if (!idloichuc) {
@@ -34,6 +34,27 @@ export default async function handler(req, res) {
         .eq('idloichuc', idloichuc);
       if (error) throw error;
       return res.status(200).json({ success: true });
+    }
+
+    // PUT: Sửa lời chúc
+    if (req.method === 'PUT') {
+      const { idloichuc, tennguoichuc, loichuc } = req.body;
+      if (!idloichuc) {
+        return res.status(400).json({ success: false, error: 'Thiếu id lời chúc' });
+      }
+      const updates = {};
+      if (tennguoichuc !== undefined) updates.tennguoichuc = tennguoichuc;
+      if (loichuc !== undefined) updates.loichuc = loichuc;
+
+      const { data, error } = await supabase
+        .from('loichuc')
+        .update(updates)
+        .eq('idloichuc', idloichuc)
+        .select()
+        .single();
+
+      if (error) return res.status(500).json({ success: false, error: error.message });
+      return res.status(200).json({ success: true, data });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
